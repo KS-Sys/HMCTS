@@ -14,13 +14,32 @@ namespace HMCTS
             // this is where the main code will be executed for the back_end API
             // I am using MYSQL.
             debug();
+
         }
 
         public static void debug()
         {
             var dbtest = DB_connector.Instance();
             dbtest.OpenConnection();
-            Console.Read();
+
+            TaskModel listrun = new TaskModel();
+
+            TaskService service = new TaskService(listrun);
+            service.GetAllTasks();
+            /*Console.WriteLine("Insert task name");
+            string name = Console.ReadLine();
+
+            Console.WriteLine("Insert task description");
+            string desc = Console.ReadLine();
+
+            Console.WriteLine("Insert task due date");
+            string due = Console.ReadLine();
+
+            TaskModel new_task = new TaskModel(name, desc, due);
+
+            TaskService service = new TaskService(new_task);*/
+
+            dbtest.CloseConnection();
         }
     }
 }

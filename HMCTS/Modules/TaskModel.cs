@@ -31,6 +31,11 @@ namespace HMCTS.Modules
             Task_Status = false;
             Task_Due = due;
         }
-
+        /// <summary>
+        /// I have added a empty constructor for a cs7036 error from generating
+        /// </summary>
+        public TaskModel()
+        {
+        }
     }
 }

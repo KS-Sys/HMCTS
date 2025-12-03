@@ -8,16 +8,16 @@ namespace HMCTS.Modules
 {
     internal interface ITaskService
     {
-        void Create_Task();
+        void Create_Task(TaskModel task);
 
-        List<string> GetAllTasks();
+        List<TaskModel> GetAllTasks();
 
-        int GetTaskByid();
+        int GetTaskByid(TaskModel task);
 
-        void Update_Task();
+        void Update_Task(TaskModel task);
 
-        int Delete_Task();
+        int Delete_Task(TaskModel task);
 
-        List<string> CheckOverDueTask();
+        List<TaskModel> CheckOverDueTask();
     }
 }
