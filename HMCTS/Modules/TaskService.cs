@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MySql.Data;
+using MySql.Data.MySqlClient;
 
 namespace HMCTS.Modules
 {
@@ -15,6 +17,7 @@ namespace HMCTS.Modules
 
         public void Create_Task()
         {
+            string sql = "INSERT INTO moj_db (task, description, status, duedate) VALUES (@task, @description, @status, @duedate)";
             throw new NotImplementedException();
         }
 

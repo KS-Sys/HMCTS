@@ -14,6 +14,7 @@ namespace HMCTS.Modules
         {
 
         }
+        private static DB_connector _instance = null;
         public MySqlConnection GetConnected { get; set; }
 
         public void OpenConnection()
