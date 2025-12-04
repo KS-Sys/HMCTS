@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using MySql.Data;
 using MySql.Data.MySqlClient;
 
-namespace HMCTS.Modules
+namespace HMCTS.logic
 {
-    internal class TaskService : ITaskService
+    public class TaskService : ITaskService
     {
-        private TaskModel new_task;
+        private TaskModel? new_task;
 
         public TaskService() { }
 
