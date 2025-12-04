@@ -21,7 +21,41 @@ namespace HMCTS.Modules
 
         public List<TaskModel> CheckOverDueTask()
         {
-            throw new NotImplementedException();
+            List<TaskModel> list = new List<TaskModel>();
+
+            //string comparedatetime = DateTime.Now.ToString();
+
+            string query = "SELECT * FROM moj_db WHERE duedate < NOW() AND status = 0";
+
+            try
+            {
+                var connection = DB_connector.Instance().GetConnected;
+
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            TaskModel model = new TaskModel();
+
+                            model.TaskID = Convert.ToInt32(reader["TaskID"]);
+                            model.Task_Title = reader["Title"].ToString();
+                            model.Task_Description = reader["Description"].ToString();
+                            model.Task_Status = Convert.ToBoolean(reader["state"]);
+                            model.Task_Due = reader["due_date"].ToString();
+
+                            list.Add(model);
+
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return list;
         }
 
         public void CreateNewTable()
