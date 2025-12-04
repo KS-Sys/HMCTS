@@ -12,6 +12,8 @@ namespace HMCTS.Modules
     {
         private TaskModel new_task;
 
+        public TaskService() { }
+
         public TaskService(TaskModel new_task)
         {
             this.new_task = new_task;
@@ -22,13 +24,42 @@ namespace HMCTS.Modules
             throw new NotImplementedException();
         }
 
+        public void CreateNewTable()
+        {
+            string query = @"CREATE TABLE IF NOT EXISTS moj_db (
+                        TaskID INT AUTO_INCREMENT PRIMARY KEY,
+                        task VARCHAR(255) NOT NULL,
+                        description TEXT,
+                        status TINYINT(1) DEFAULT 0,
+                        duedate VARCHAR(100)
+                    );";
+
+            try
+            {
+                var connection = DB_connector.Instance().GetConnected;
+
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.ExecuteNonQuery();
+                    Console.WriteLine("Table 'tasks' verified.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         public void Create_Task(TaskModel task)
         {
+
             string query = "INSERT INTO moj_db (task, description, status, duedate) VALUES (@task, @description, @status, @duedate)";
 
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand(query))
+                var connection = DB_connector.Instance().GetConnected;
+
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@task", task.Task_Title);
                     cmd.Parameters.AddWithValue("@description", task.Task_Description);
@@ -60,7 +91,9 @@ namespace HMCTS.Modules
 
             try
             {
-                using (MySqlCommand cmd = new MySqlCommand(query))
+                var connection = DB_connector.Instance().GetConnected;
+
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {

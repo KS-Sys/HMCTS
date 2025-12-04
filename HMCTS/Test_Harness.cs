@@ -20,13 +20,19 @@ namespace HMCTS
         public static void debug()
         {
             var dbtest = DB_connector.Instance();
+                
+            
             dbtest.OpenConnection();
 
-            TaskModel listrun = new TaskModel();
+            TaskService createservice = new TaskService();
 
-            TaskService service = new TaskService(listrun);
-            service.GetAllTasks();
-            /*Console.WriteLine("Insert task name");
+            createservice.CreateNewTable();
+
+            //TaskModel listrun = new TaskModel();
+
+            //TaskService service = new TaskService(listrun);
+            //service.GetAllTasks();
+            Console.WriteLine("Insert task name");
             string name = Console.ReadLine();
 
             Console.WriteLine("Insert task description");
@@ -37,7 +43,9 @@ namespace HMCTS
 
             TaskModel new_task = new TaskModel(name, desc, due);
 
-            TaskService service = new TaskService(new_task);*/
+            TaskService service = new TaskService(new_task);
+
+            service.Create_Task(new_task);
 
             dbtest.CloseConnection();
         }

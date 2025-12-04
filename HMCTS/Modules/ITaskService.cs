@@ -10,6 +10,8 @@ namespace HMCTS.Modules
     {
         void Create_Task(TaskModel task);
 
+        void CreateNewTable();
+
         List<TaskModel> GetAllTasks();
 
         int GetTaskByid(TaskModel task);
