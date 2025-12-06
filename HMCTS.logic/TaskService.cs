@@ -19,6 +19,10 @@ namespace HMCTS.logic
             this.new_task = new_task;
         }
 
+        /// <summary>
+        /// this method checks for overdue tasks by comparing the due date with the current date and time. but is not implemented in the test harness or api and is for future use.
+        /// </summary>
+        /// <returns></returns>
         public List<TaskModel> CheckOverDueTask()
         {
             List<TaskModel> list = new List<TaskModel>();
@@ -65,6 +69,9 @@ namespace HMCTS.logic
             return list;
         }
 
+        /// <summary>
+        /// I created this method to create the table if it does not already exist. as it would throw errors otherwise.
+        /// </summary>
         public void CreateNewTable()
         {
             string query = @"CREATE TABLE IF NOT EXISTS moj_db (
@@ -101,6 +108,8 @@ namespace HMCTS.logic
                 return;
             }
 
+            CreateNewTable(); // ensure the table exists before trying to insert data.
+
             string query = "INSERT INTO moj_db (task, description, status, duedate) VALUES (@task, @description, @status, @duedate)";
 
             try
@@ -127,12 +136,22 @@ namespace HMCTS.logic
             }
         }
 
+        /// <summary>
+        /// i was planning to add a delete method but ran out of time.
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public int Delete_Task(TaskModel task)
         {
             throw new NotImplementedException();
         }
 
-
+        /// <summary>
+        /// this is the method to get all tasks from the db and populates it into a list of TaskModel objects.
+        /// it is the returned as a list.
+        /// </summary>
+        /// <returns></returns>
         public List<TaskModel> GetAllTasks()
         {
             List<TaskModel> list = new List<TaskModel>();
@@ -177,12 +196,22 @@ namespace HMCTS.logic
             return list;
         }
 
-
+        /// <summary>
+        /// i was planning to add a get by id method by id but ran out of time.
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public int GetTaskByid(TaskModel task)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// i wanted to add an update method to update existing tasks if i could change their status or details but ran out of time.
+        /// </summary>
+        /// <param name="task"></param>
+        /// <exception cref="NotImplementedException"></exception>
         public void Update_Task(TaskModel task)
         {
             throw new NotImplementedException();

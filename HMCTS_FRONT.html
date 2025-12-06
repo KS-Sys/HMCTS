@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HMCTS task manager</title>
+    <style>
+        /* Simple styling to make the table look nice */
+        body { font-family: sans-serif; padding: 20px; }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+        }
+        
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 8px; 
+            text-align: left; 
+        }
+        
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        .status-open { color: red; font-weight: bold; }
+        .status-done { color: green; font-weight: bold; }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        input { padding: 5px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+	<center>
+    <h1>HMCTS TASK SCHEDULER</h1>
+	</center>
+
+    <div style="background: #eee; padding: 15px; border-radius: 5px;">
+        <h3>Create New Task</h3>
+        <input type="text" id="taskName" placeholder="Task Name" />
+        <input type="text" id="taskDesc" placeholder="Description" />
+        <input type="datetime-local" id="taskDue" />
+        <button onclick="saveTask()">Add Task</button>
+    </div>
+
+    <h3>Current Tasks</h3>
+    <button onclick="loadTasks()">Refresh List</button>
+    
+    <table id="tasksTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Due Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = "https://localhost:7254/api/tasks"; // CHECK THIS PORT!
+
+    // --- FUNCTION 1: Load Data into Table ---
+    async function loadTasks() {
+        try {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+
+            const tableBody = document.querySelector("#tasksTable tbody");
+            tableBody.innerHTML = ""; // Clear existing rows
+
+            data.forEach(task => {
+                // Determine if status is True (Done) or False (Open)
+                const statusText = task.task_Status ? "COMPLETED" : "OPEN";
+                const statusClass = task.task_Status ? "status-done" : "status-open";
+
+                // Build the row HTML
+                const row = `
+                    <tr>
+                        <td>${task.taskID}</td>
+                        <td>${task.task_Title}</td>
+                        <td>${task.task_Description}</td>
+                        <td>${task.task_Due}</td>
+                        <td class="${statusClass}">${statusText}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        } catch (error) {
+            console.error("Error loading tasks:", error);
+            alert("Could not load tasks. Is the API running?");
+        }
+    }
+
+    // --- FUNCTION 2: Save New Task ---
+    async function saveTask() {
+        const name = document.getElementById("taskName").value;
+        const desc = document.getElementById("taskDesc").value;
+        const due = document.getElementById("taskDue").value;
+
+        const newTask = {
+            task_Title: name,
+            task_Description: desc,
+            task_Status: false,
+            task_Due: due
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newTask)
+            });
+
+            if (response.ok) {
+                alert("Task Saved!");
+                // Clear text boxes
+                document.getElementById("taskName").value = "";
+                document.getElementById("taskDesc").value = "";
+                
+                // Refresh the table immediately so we see the new task
+                loadTasks(); 
+            } else {
+                alert("Error saving task");
+            }
+        } catch (error) {
+            console.error("Error saving task:", error);
+        }
+    }
+
+    // Load tasks automatically when the page opens
+    window.onload = loadTasks;
+
+</script>
+
+</body>
+</html>
