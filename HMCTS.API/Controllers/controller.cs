@@ -41,8 +41,9 @@ namespace HMCTS.API.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] TaskModel newTask)
         {
-            TaskService service = new TaskService();
-            service.Create_Task(newTask);
+            //TaskService service = new TaskService();
+            //service.Create_Task(newTask);
+            _service.Create_Task(newTask);
             return Ok("Task Created Successfully");
         }
 
