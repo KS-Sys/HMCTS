@@ -23,6 +23,13 @@ namespace HMCTS.logic
         {
             List<TaskModel> list = new List<TaskModel>();
 
+            // this forces the db connection to open as it is returning errors. it is a slight adjustment to the console test harness.
+            // it is likely that i will need to do this for every method that accesses the db.
+            if (DB_connector.Instance().OpenConnection() == false)
+            {
+                return list;
+            }
+
             //string comparedatetime = DateTime.Now.ToString();
 
             string query = "SELECT * FROM moj_db WHERE duedate < NOW() AND status = 0";
@@ -40,10 +47,10 @@ namespace HMCTS.logic
                             TaskModel model = new TaskModel();
 
                             model.TaskID = Convert.ToInt32(reader["TaskID"]);
-                            model.Task_Title = reader["Title"].ToString();
-                            model.Task_Description = reader["Description"].ToString();
-                            model.Task_Status = Convert.ToBoolean(reader["state"]);
-                            model.Task_Due = reader["due_date"].ToString();
+                            model.Task_Title = reader["task"].ToString();
+                            model.Task_Description = reader["description"].ToString();
+                            model.Task_Status = Convert.ToBoolean(reader["status"]);
+                            model.Task_Due = reader["duedate"].ToString();
 
                             list.Add(model);
 
@@ -65,7 +72,7 @@ namespace HMCTS.logic
                         task VARCHAR(255) NOT NULL,
                         description TEXT,
                         status TINYINT(1) DEFAULT 0,
-                        duedate VARCHAR(100)
+                        duedate DATETIME(100)
                     );";
 
             try
@@ -87,18 +94,27 @@ namespace HMCTS.logic
         public void Create_Task(TaskModel task)
         {
 
+            // this forces the db connection to open as it is returning errors. it is a slight adjustment to the console test harness.
+            // it is likely that i will need to do this for every method that accesses the db.
+            if (DB_connector.Instance().OpenConnection() == false)
+            {
+                return;
+            }
+
             string query = "INSERT INTO moj_db (task, description, status, duedate) VALUES (@task, @description, @status, @duedate)";
 
             try
             {
                 var connection = DB_connector.Instance().GetConnected;
 
+                DateTime pDate = Convert.ToDateTime(task.Task_Due);
+
                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@task", task.Task_Title);
                     cmd.Parameters.AddWithValue("@description", task.Task_Description);
                     cmd.Parameters.AddWithValue("@status", task.Task_Status);
-                    cmd.Parameters.AddWithValue("@duedate", task.Task_Due);
+                    cmd.Parameters.AddWithValue("@duedate", pDate);
 
                     cmd.ExecuteNonQuery();
 
@@ -121,6 +137,13 @@ namespace HMCTS.logic
         {
             List<TaskModel> list = new List<TaskModel>();
 
+            // this forces the db connection to open as it is returning errors. it is a slight adjustment to the console test harness.
+            // it is likely that i will need to do this for every method that accesses the db.
+            if (DB_connector.Instance().OpenConnection() == false)
+            {
+                return list;
+            }
+
             string query = "SELECT * FROM moj_db";
 
             try
@@ -136,10 +159,10 @@ namespace HMCTS.logic
                             TaskModel model = new TaskModel();
 
                             model.TaskID = Convert.ToInt32(reader["TaskID"]);
-                            model.Task_Title = reader["Title"].ToString();
-                            model.Task_Description = reader["Description"].ToString();
-                            model.Task_Status = Convert.ToBoolean(reader["state"]);
-                            model.Task_Due = reader["due_date"].ToString();
+                            model.Task_Title = reader["task"].ToString();
+                            model.Task_Description = reader["description"].ToString();
+                            model.Task_Status = Convert.ToBoolean(reader["status"]);
+                            model.Task_Due = reader["duedate"].ToString();
 
                             list.Add(model);
 

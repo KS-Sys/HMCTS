@@ -32,7 +32,7 @@ namespace HMCTS.logic
             Task_Due = due;
         }
         /// <summary>
-        /// I have added a empty constructor for a cs7036 error from generating
+        /// I have added a empty constructor for a cs7036 error from generating as i had to use taskmodel without parameters
         /// </summary>
         public TaskModel()
         {

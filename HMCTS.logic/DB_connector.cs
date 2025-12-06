@@ -8,8 +8,14 @@ using MySql.Data.MySqlClient;
 
 namespace HMCTS.logic
 {
-    internal class DB_connector
+    /// <summary>
+    /// I created a singleton class to manage the database connection and put in in the backend logic project
+    /// </summary>
+    public class DB_connector
     {
+        /// <summary>
+        /// I had issues with my code so i had to add a private constructor to prevent instantiation from outside
+        /// </summary>
         private DB_connector()
         {
 
@@ -23,6 +29,10 @@ namespace HMCTS.logic
             return _instance;
         }
 
+        /// <summary>
+        /// the boolean below connects to the moj_db database on localhost at port 3306 with user root and password password
+        /// </summary>
+        /// <returns></returns>
         public bool OpenConnection()
         {
             if(GetConnected == null)
@@ -50,9 +60,14 @@ namespace HMCTS.logic
 
         }
 
+        /// <summary>
+        /// the method below closes the connection to the database but was depricated because i dropped the console project
+        /// </summary>
         public void CloseConnection()
         {
             GetConnected.Close();
         }
+
+        
     }
 }
