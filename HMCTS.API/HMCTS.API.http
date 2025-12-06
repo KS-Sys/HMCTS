@@ -1,6 +1,6 @@
 @HMCTS.API_HostAddress = http://localhost:5259
 
-GET {{HMCTS.API_HostAddress}}/weatherforecast/
+GET {{HMCTS.API_HostAddress}}/HMCTS/
 Accept: application/json
 
 ###
