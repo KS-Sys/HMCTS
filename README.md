@@ -9,3 +9,12 @@ I also created a front end API for the sql database to be interacted with.
 The project has the old console and new api. unit tests are included in the solution.
 
 I have added a HTML webpage for the project to be interfaced with. It was mostly generated with AI and i only changed a few things.
+
+project written in c#.
+ASP.NET used in front end.
+html used for webpage.
+
+The project allows the creation of tasks and retutns current tasks on a table.
+
+In the future I am planning to allow tasks to be updated, deleted and to be able to get tasks that are overdue and not complete.
+The project is not in release and is still in debug only.
