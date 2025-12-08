@@ -14,7 +14,7 @@ project written in c#.
 ASP.NET used in front end.
 html used for webpage.
 
-The project allows the creation of tasks and retutns current tasks on a table.
+The project allows the creation of tasks and returns current tasks on a table.
 
 In the future I am planning to allow tasks to be updated, deleted and to be able to get tasks that are overdue and not complete.
 The project is not in release and is still in debug only.
