@@ -87,5 +87,28 @@ namespace HMCTS.API.Controllers
             }
 
         }
+
+        /// <summary>
+        /// Updates an existing task with the specified identifier using the provided task details.
+        /// </summary>
+        /// <param name="id">The unique identifier of the task to update. Must match the TaskID of <paramref name="updatedTask"/>.</param>
+        /// <param name="updatedTask">The updated task data to apply. The <see cref="TaskModel.TaskID"/> property must match the <paramref
+        /// name="id"/> parameter. Cannot be null.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating the result of the update operation. Returns 200 OK if the update
+        /// is successful; otherwise, returns 400 Bad Request if the identifiers do not match.</returns>
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] TaskModel updatedTask)
+        {
+
+            if (id != updatedTask.TaskID)
+            {
+                return BadRequest("Task mismatched");
+            }
+
+            _service.Update_Task(updatedTask);
+
+            return Ok("task updated succesfully");
+
+        }
     }
 }

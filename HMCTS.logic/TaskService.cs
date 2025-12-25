@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -147,7 +148,7 @@ namespace HMCTS.logic
             // this forces the db connection to open as it is returning errors. it is a slight adjustment to the console test harness.
             if (DB_connector.Instance().OpenConnection() == false)
             {
-                return - 1;
+                return -1;
             }
 
             //query to delete task based on task title.
@@ -214,7 +215,7 @@ namespace HMCTS.logic
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
@@ -239,7 +240,41 @@ namespace HMCTS.logic
         /// <exception cref="NotImplementedException"></exception>
         public void Update_Task(TaskModel task)
         {
-            throw new NotImplementedException();
+            if (DB_connector.Instance().OpenConnection() == false)
+            {
+                return;
+            }
+
+            string query = "UPDATE moj_db SET task = @task, description = @description, status = @status, duedate = @duedate WHERE TaskID = @TaskID";
+            try
+            {
+                var connection = DB_connector.Instance().GetConnected;
+                DateTime pDate = Convert.ToDateTime(task.Task_Due);
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@task", task.Task_Title);
+                    cmd.Parameters.AddWithValue("@description", task.Task_Description);
+                    cmd.Parameters.AddWithValue("@status", task.Task_Status);
+                    cmd.Parameters.AddWithValue("@duedate", pDate);
+                    cmd.Parameters.AddWithValue("@TaskID", task.TaskID);
+
+                    int rows = cmd.ExecuteNonQuery();
+                    if (rows > 0)
+                    {
+                        Console.WriteLine("Task updated all OK!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("No task found with the specified ID.");
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
+
 }
