@@ -41,8 +41,6 @@ namespace HMCTS.API.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] TaskModel newTask)
         {
-            //TaskService service = new TaskService();
-            //service.Create_Task(newTask);
             _service.Create_Task(newTask);
             return Ok("Task Created Successfully");
         }
@@ -58,6 +56,36 @@ namespace HMCTS.API.Controllers
             TaskService service = new TaskService();
             var overdue = service.CheckOverDueTask();
             return Ok(overdue);
+        }
+
+        /// <summary>
+        /// Deletes the task with the specified identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the task to delete.</param>
+        /// <returns>An <see cref="IActionResult"/> indicating the result of the delete operation. Returns <see
+        /// cref="NotFoundResult"/> if the task does not exist, <see cref="OkObjectResult"/> if the task was deleted
+        /// successfully, or <see cref="StatusCodeResult"/> with status code 500 if an error occurred during deletion.</returns>
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            TaskModel delete = new TaskModel();
+            delete.TaskID = id;
+
+            int result = _service.Delete_Task(delete);
+
+            if (result > 0)
+            {
+                return Ok($"Task {id} deleted");
+            }
+            else if (result == 0)
+            {
+                return NotFound($"Task {id} Error finding task");
+            }
+            else
+            {
+                return StatusCode(500, "task not found");
+            }
+
         }
     }
 }

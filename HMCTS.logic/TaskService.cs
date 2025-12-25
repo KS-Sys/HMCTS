@@ -137,14 +137,39 @@ namespace HMCTS.logic
         }
 
         /// <summary>
-        /// i was planning to add a delete method but ran out of time.
+        /// this is the method to delete a task from the db. it is not implemented in the test harness or api and is for future use.
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
         public int Delete_Task(TaskModel task)
         {
-            throw new NotImplementedException();
+            // this forces the db connection to open as it is returning errors. it is a slight adjustment to the console test harness.
+            if (DB_connector.Instance().OpenConnection() == false)
+            {
+                return - 1;
+            }
+
+            //query to delete task based on task title.
+            string query = "DELETE FROM moj_db WHERE TaskID = @TaskID";
+
+            //try catch statement to execute the delete command.
+            try
+            {
+                var connection = DB_connector.Instance().GetConnected;
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@TaskID", task.TaskID);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    Console.WriteLine("Task deleted all OK!");
+                    return rowsAffected;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -1;
+            }
         }
 
         /// <summary>
