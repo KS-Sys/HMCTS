@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HMCTS task manager</title>
+    <title>HMCTS Task Manager</title>
     <style>
-        /* Simple styling to make the table look nice */
         body { font-family: sans-serif; padding: 20px; }
         
         table { 
@@ -25,28 +24,49 @@
         .status-done { color: green; font-weight: bold; }
         
         .container { max-width: 800px; margin: 0 auto; }
-        input { padding: 5px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-        button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
+        input, select { padding: 5px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        
+        /* Button Styles */
+        button { padding: 10px; color: white; border: none; cursor: pointer; margin-right: 5px; }
+        .btn-primary { background-color: #007bff; } /* Blue for Add/Update */
+        .btn-danger { background-color: #dc3545; }  /* Red for Delete */
+        .btn-warning { background-color: #ffc107; color: black; } /* Yellow for Edit */
+        .btn-secondary { background-color: #6c757d; } /* Gray for Cancel */
+        
+        button:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div class="container">
-	<center>
-    <h1>HMCTS TASK SCHEDULER</h1>
-	</center>
+    <center>
+        <h1>HMCTS TASK SCHEDULER</h1>
+    </center>
 
     <div style="background: #eee; padding: 15px; border-radius: 5px;">
-        <h3>Create New Task</h3>
+        <h3 id="formTitle">Create New Task</h3>
+        
+        <input type="hidden" id="taskId" />
+
         <input type="text" id="taskName" placeholder="Task Name" />
         <input type="text" id="taskDesc" placeholder="Description" />
+        
+        <label>Due Date:</label>
         <input type="datetime-local" id="taskDue" />
-        <button onclick="saveTask()">Add Task</button>
+        
+        <label>Status:</label>
+        <select id="taskStatus">
+            <option value="false">Open</option>
+            <option value="true">Completed</option>
+        </select>
+
+        <br><br>
+        <button id="saveBtn" class="btn-primary" onclick="saveTask()">Add Task</button>
+        <button id="cancelBtn" class="btn-secondary" onclick="resetForm()" style="display:none;">Cancel Edit</button>
     </div>
 
     <h3>Current Tasks</h3>
-    <button onclick="loadTasks()">Refresh List</button>
+    <button class="btn-primary" onclick="loadTasks()">Refresh List</button>
     
     <table id="tasksTable">
         <thead>
@@ -56,7 +76,7 @@
                 <th>Description</th>
                 <th>Due Date</th>
                 <th>Status</th>
-            </tr>
+                <th>Actions</th> </tr>
         </thead>
         <tbody>
             </tbody>
@@ -64,77 +84,159 @@
 </div>
 
 <script>
-    const API_URL = "https://localhost:7254/api/tasks"; // CHECK THIS PORT!
+    const API_URL = "https://localhost:7254/api/tasks"; 
+    
+    // We store the tasks here so we can easily fill the form when clicking "Edit"
+    let tasksCache = []; 
 
-    // --- FUNCTION 1: Load Data into Table ---
+    // --- FUNCTION 1: Load Data ---
     async function loadTasks() {
         try {
             const response = await fetch(API_URL);
             const data = await response.json();
+            
+            tasksCache = data; // Store data in global variable
 
             const tableBody = document.querySelector("#tasksTable tbody");
-            tableBody.innerHTML = ""; // Clear existing rows
+            tableBody.innerHTML = ""; 
 
             data.forEach(task => {
-                // Determine if status is True (Done) or False (Open)
                 const statusText = task.task_Status ? "COMPLETED" : "OPEN";
                 const statusClass = task.task_Status ? "status-done" : "status-open";
 
-                // Build the row HTML
+                // Format date for display (optional, keeps it clean)
+                const displayDate = task.task_Due.replace("T", " ");
+
                 const row = `
                     <tr>
                         <td>${task.taskID}</td>
                         <td>${task.task_Title}</td>
                         <td>${task.task_Description}</td>
-                        <td>${task.task_Due}</td>
+                        <td>${displayDate}</td>
                         <td class="${statusClass}">${statusText}</td>
+                        <td>
+                            <button class="btn-warning" onclick="editTask(${task.taskID})">Edit</button>
+                            <button class="btn-danger" onclick="deleteTask(${task.taskID})">Delete</button>
+                        </td>
                     </tr>
                 `;
                 tableBody.innerHTML += row;
             });
         } catch (error) {
             console.error("Error loading tasks:", error);
-            alert("Could not load tasks. Is the API running?");
         }
     }
 
-    // --- FUNCTION 2: Save New Task ---
+    // --- FUNCTION 2: Save (Handles BOTH Create and Update) ---
     async function saveTask() {
+        // 1. Get values from form
+        const id = document.getElementById("taskId").value; // Is this empty?
         const name = document.getElementById("taskName").value;
         const desc = document.getElementById("taskDesc").value;
         const due = document.getElementById("taskDue").value;
+        const status = document.getElementById("taskStatus").value === "true"; // Convert string to boolean
 
-        const newTask = {
+        const taskData = {
+            taskID: id ? parseInt(id) : 0, // If ID exists, use it. Else 0.
             task_Title: name,
             task_Description: desc,
-            task_Status: false,
+            task_Status: status,
             task_Due: due
         };
 
         try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newTask)
-            });
+            let response;
+            
+            // 2. Decide: POST (New) or PUT (Update)
+            if (id) {
+                // UPDATE MODE
+                response = await fetch(`${API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(taskData)
+                });
+            } else {
+                // CREATE MODE
+                response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(taskData)
+                });
+            }
 
             if (response.ok) {
-                alert("Task Saved!");
-                // Clear text boxes
-                document.getElementById("taskName").value = "";
-                document.getElementById("taskDesc").value = "";
-                
-                // Refresh the table immediately so we see the new task
-                loadTasks(); 
+                alert(id ? "Task Updated!" : "Task Created!");
+                resetForm(); // Clear the text boxes
+                loadTasks(); // Refresh the table
             } else {
-                alert("Error saving task");
+                alert("Error saving task. Check console.");
             }
         } catch (error) {
             console.error("Error saving task:", error);
         }
     }
 
-    // Load tasks automatically when the page opens
+    // --- FUNCTION 3: Delete Task ---
+    async function deleteTask(id) {
+        if (!confirm("Are you sure you want to delete Task " + id + "?")) return;
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (response.ok) {
+                loadTasks(); // Refresh list
+            } else {
+                alert("Failed to delete task.");
+            }
+        } catch (error) {
+            console.error("Error deleting:", error);
+        }
+    }
+
+    // --- FUNCTION 4: Prepare Edit Mode ---
+    function editTask(id) {
+        // Find the task object from our cache
+        const task = tasksCache.find(t => t.taskID === id);
+        if (!task) return;
+
+        // Fill the form with this task's data
+        document.getElementById("taskId").value = task.taskID;
+        document.getElementById("taskName").value = task.task_Title;
+        document.getElementById("taskDesc").value = task.task_Description;
+        
+        // Date formatting: Input expects "yyyy-MM-ddThh:mm", API might give "yyyy-MM-ddThh:mm:ss"
+        // We slice the first 16 chars to match the input format
+        if(task.task_Due) {
+             document.getElementById("taskDue").value = task.task_Due.slice(0, 16);
+        }
+
+        // Set Status Dropdown
+        document.getElementById("taskStatus").value = task.task_Status ? "true" : "false";
+
+        // Change UI to "Edit Mode"
+        document.getElementById("formTitle").innerText = "Edit Task #" + id;
+        document.getElementById("saveBtn").innerText = "Update Task";
+        document.getElementById("saveBtn").className = "btn-warning";
+        document.getElementById("cancelBtn").style.display = "inline-block";
+    }
+
+    // --- FUNCTION 5: Reset Form ---
+    function resetForm() {
+        document.getElementById("taskId").value = "";
+        document.getElementById("taskName").value = "";
+        document.getElementById("taskDesc").value = "";
+        document.getElementById("taskDue").value = "";
+        document.getElementById("taskStatus").value = "false";
+
+        // Revert UI to "Create Mode"
+        document.getElementById("formTitle").innerText = "Create New Task";
+        document.getElementById("saveBtn").innerText = "Add Task";
+        document.getElementById("saveBtn").className = "btn-primary";
+        document.getElementById("cancelBtn").style.display = "none";
+    }
+
     window.onload = loadTasks;
 
 </script>
